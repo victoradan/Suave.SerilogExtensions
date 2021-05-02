@@ -10,18 +10,20 @@ type PassThroughLogEnricher(context: HttpContext) =
         member this.Enrich(logEvent: LogEvent, _: ILogEventPropertyFactory) = 
             let anyOf xs = fun x -> List.exists ((=) x) xs 
 
-            context.userState
-            |> Map.find "Stopwatch"
-            |> unbox<Stopwatch> 
-            |> fun stopwatch -> 
-                stopwatch.Stop()
-                stopwatch.ElapsedMilliseconds
-                |> int
-                |> Enrichers.eventProperty "Duration"
-                |> logEvent.AddOrUpdateProperty
+            match Dictionary.tryFind "Stopwatch" context.userState with
+            | None -> failwith "No Stopwatch found"
+            | Some v -> 
+                v |> unbox<Stopwatch> 
+                |> fun stopwatch -> 
+                    stopwatch.Stop()
+                    stopwatch.ElapsedMilliseconds
+                    |> int
+                    |> Enrichers.eventProperty "Duration"
+                    |> logEvent.AddOrUpdateProperty
 
-            context.userState
-            |> Map.find "RequestId"
-            |> unbox<string> 
-            |> Enrichers.eventProperty "RequestId"
-            |> logEvent.AddOrUpdateProperty            
+                match Dictionary.tryFind "RequestId" context.userState with
+                | None -> failwith "No RequestId found"
+                | Some v -> 
+                    v |> unbox<string> 
+                    |> Enrichers.eventProperty "RequestId"
+                    |> logEvent.AddOrUpdateProperty            

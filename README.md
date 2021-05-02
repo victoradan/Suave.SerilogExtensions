@@ -121,13 +121,17 @@ let webAppWithLogging = SerilogAdapter.Enable(webApp, serilogConfig)
 ![Build History](https://buildstats.info/travisci/chart/Zaid-Ajaj/Suave.SerilogExtensions)
 
 
-### Building
-
-
+### Development
 Make sure the following **requirements** are installed in your system:
 
-* [dotnet SDK](https://www.microsoft.com/net/download/core) 2.0 or higher
-* [Mono](http://www.mono-project.com/) if you're on Linux or macOS.
+* [dotnet SDK](https://dotnet.microsoft.com/download) 5.0 or higher
+
+```
+> dotnet new tool-manifest
+> dotnet install Paket
+> dotnet paket install
+```
+### Building
 
 ```
 > build.cmd // on windows

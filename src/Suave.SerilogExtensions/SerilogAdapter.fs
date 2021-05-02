@@ -11,7 +11,7 @@ module Extensions =
         /// Returns a logger with the RequestId attached to it, if present.
         member ctx.Logger() : ILogger = 
             ctx.userState
-            |> Map.tryFind "RequestId"
+            |> Dictionary.tryFind "RequestId"
             |> function 
                 | None -> Log.Logger
                 | Some requestId -> Log.ForContext("RequestId", requestId)   
@@ -28,11 +28,8 @@ type SerilogAdapter() =
             requestLogger.Information(config.RequestMessageTemplate)
             
             try
-              let contextWithRequestId = 
-                { ctx with 
-                    userState = Map.add "RequestId" (box requestId) ctx.userState }
-
-              let! result = app contextWithRequestId
+              ctx.userState.Add("RequestId", box requestId)
+              let! result = app ctx
               match result with 
               | Some resultContext ->
                   let responseLogger = Log.ForContext(ResponseLogEnricher(resultContext, config, stopwatch, requestId))
